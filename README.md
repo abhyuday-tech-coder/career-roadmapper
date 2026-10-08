@@ -1,0 +1,827 @@
+# 🗺️ Career Roadmapper
+
+### AI-Powered Personalized Career Roadmap Platform
+
+Career Roadmapper is an interactive web application that uses **Google Gemini AI and Google Search grounding** to create personalized, realistic career roadmaps for students and aspiring professionals.
+
+Instead of giving generic advice such as *“learn React and build projects,”* the application researches current hiring requirements and converts a user's target career into a sequence of **skills, projects, credentials, roles, and milestones**.
+
+---
+
+## 🚀 Project Overview
+
+Students often know the career they want but do not know the realistic steps required to reach it.
+
+For example:
+
+> **Goal:** Frontend Engineer
+
+A generic recommendation might be:
+
+> Learn HTML → CSS → JavaScript → React
+
+Career Roadmapper attempts to provide a more structured pathway:
+
+```text
+Current Background
+       ↓
+Industry Research
+       ↓
+Skill Gap Identification
+       ↓
+Skills & Projects
+       ↓
+Credentials
+       ↓
+Intermediate Roles
+       ↓
+Final Career Goal
+```
+
+The roadmap is generated dynamically using AI and current web-grounded information.
+
+---
+
+# 🎯 Problem Statement
+
+Traditional career guidance is often too generic.
+
+Students may not know:
+
+* Which skills are actually required for a particular role
+* Which technologies are currently being requested
+* Which projects can demonstrate those skills
+* Which certifications or courses may be useful
+* What intermediate roles can lead toward their final goal
+* What they should learn first
+* How long different steps may take
+* Which skills they already know
+* How to adapt their roadmap as they progress
+
+Career Roadmapper is designed to address these problems through an **AI-powered, personalized, adaptive roadmap**.
+
+---
+
+# 💡 Solution
+
+Career Roadmapper takes:
+
+* Target career/role
+* User's current background
+* Preferred language
+* Learning pace
+
+It then researches current hiring information and generates a structured roadmap containing:
+
+* Skills
+* Projects
+* Credentials
+* Intermediate roles
+* Final career goal
+* Dependencies
+* Estimated learning time
+* Reasons for each step
+
+The roadmap can then be modified as the student marks skills or milestones as already known.
+
+---
+
+# ✨ Key Features
+
+## 1. 🤖 AI-Powered Career Research
+
+The application uses **Google Gemini** together with **Google Search grounding** to research current hiring requirements.
+
+The research considers areas such as:
+
+* Requested skills
+* Tools and technologies
+* Entry-level roles
+* Intermediate roles
+* Useful certifications
+* Courses
+* Hiring trends
+* Current-year industry requirements
+
+---
+
+## 2. 🗺️ Personalized Career Roadmap
+
+The AI generates a roadmap containing approximately **14–18 steps** organized into **4 phases**.
+
+Each roadmap node can represent:
+
+* `skill`
+* `project`
+* `credential`
+* `role`
+* `goal`
+
+Each step can include:
+
+* Title
+* Phase
+* Estimated weeks
+* Explanation of why it matters
+* Dependencies
+* Career progression relationship
+
+---
+
+## 3. 🔗 Dependency-Based Roadmap
+
+Roadmap steps are represented as a dependency graph.
+
+For example:
+
+```text
+HTML
+ ↓
+CSS
+ ↓
+JavaScript
+ ↓
+React
+ ↓
+Frontend Project
+ ↓
+Portfolio
+ ↓
+Junior Frontend Role
+ ↓
+Frontend Engineer
+```
+
+This helps students understand **what should be learned before moving to the next step**.
+
+---
+
+# 🔄 Adaptive Re-Planning
+
+One of the important features is that the roadmap does not have to remain fixed.
+
+If a student already knows a particular skill, they can mark that step as known.
+
+The application can then re-route the roadmap around the completed knowledge.
+
+### Example
+
+```text
+Original Roadmap
+
+HTML
+ ↓
+CSS
+ ↓
+JavaScript
+ ↓
+React
+```
+
+If the student already knows:
+
+```text
+HTML ✓
+CSS ✓
+```
+
+the roadmap can adapt so that the student focuses on the remaining relevant steps.
+
+The application also provides an AI-based **Replan** capability to keep, merge, or add roadmap steps.
+
+---
+
+# 🧑‍💼 Career Coach
+
+The **Career Coach** provides AI-generated guidance based on the student's:
+
+* Target career
+* Background
+* Roadmap
+* Known skills
+* Current filters
+* Learning pace
+* Selected roadmap node
+
+The coach can provide guidance related to the student's current career pathway.
+
+Responses are designed to remain concise and can use Google Search grounding.
+
+---
+
+# 💻 Live Coding Arena
+
+Career Roadmapper also contains a coding practice section.
+
+The coding arena can:
+
+* Generate coding challenges using AI
+* Adapt challenges to the roadmap
+* Use the selected roadmap skill
+* Provide difficulty levels
+* Support multiple programming languages
+* Provide a 10-minute challenge
+* Evaluate submitted code
+* Give a score
+* Show passed tests
+* Provide feedback
+* Provide complexity feedback
+
+### Difficulty Levels
+
+```text
+Easy
+Medium
+Hard
+```
+
+The application also uses `BroadcastChannel` to support a multi-tab leaderboard experience.
+
+---
+
+# 🌍 Multi-Language Support
+
+The application includes a language setting for AI responses.
+
+The interface also contains support for language direction, including **RTL (right-to-left)** layouts where applicable.
+
+---
+
+# 📊 Roadmap Controls
+
+Users can interact with the roadmap using:
+
+* Skill filters
+* Project filters
+* Credential filters
+* Role filters
+* Goal filters
+* Phase filters
+* Search
+* Pace selection
+* Zoom
+* Pan
+* Node selection
+
+The learning pace can be adjusted between approximately:
+
+```text
+2 – 40 hours/week
+```
+
+with a default pace of:
+
+```text
+10 hours/week
+```
+
+---
+
+# 🧠 How the Application Works
+
+```text
+┌──────────────────────┐
+│   Student enters     │
+│ Target Career        │
+│ Background           │
+│ Language             │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Gemini AI +          │
+│ Google Search        │
+│ Research             │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Current Industry     │
+│ Requirements         │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Personalized         │
+│ Roadmap Generation   │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Skills / Projects /  │
+│ Credentials / Roles  │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Student marks known  │
+│ skills               │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ AI Re-planning       │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Coach + Coding Arena │
+└──────────────────────┘
+```
+
+---
+
+# 🏗️ Application Architecture
+
+The current project is implemented as a browser-based application.
+
+```text
+                 ┌─────────────────────┐
+                 │      Student        │
+                 └──────────┬──────────┘
+                            │
+                            ▼
+                 ┌─────────────────────┐
+                 │   Web Application   │
+                 │    HTML / CSS / JS  │
+                 └──────────┬──────────┘
+                            │
+                            ▼
+                 ┌─────────────────────┐
+                 │    Gemini API       │
+                 └──────────┬──────────┘
+                            │
+                            ▼
+                 ┌─────────────────────┐
+                 │ Google Search       │
+                 │ Grounding           │
+                 └──────────┬──────────┘
+                            │
+                            ▼
+                 ┌─────────────────────┐
+                 │ Personalized        │
+                 │ Career Roadmap      │
+                 └─────────────────────┘
+```
+
+The provided implementation does **not** include a separate backend or database.
+
+---
+
+# 🛠️ Technology Stack
+
+| Technology              | Purpose                              |
+| ----------------------- | ------------------------------------ |
+| HTML5                   | Application structure                |
+| CSS3                    | User interface and responsive design |
+| JavaScript              | Application logic                    |
+| SVG                     | Interactive roadmap visualization    |
+| Google Gemini           | AI generation and reasoning          |
+| Google Search grounding | Current career/hiring research       |
+| LocalStorage            | Saving API/model/language settings   |
+| BroadcastChannel        | Multi-tab coding arena communication |
+
+---
+
+# 🤖 Gemini Configuration
+
+The application allows the user to configure:
+
+* Gemini API key
+* Gemini model
+* Response language
+
+The default model configured in the provided application is:
+
+```text
+gemini-2.5-flash
+```
+
+The model can be changed through the application's model input.
+
+---
+
+# ⚙️ Installation & Setup
+
+## Step 1 — Get the Project
+
+Download or clone the project repository.
+
+The provided project is a self-contained HTML application.
+
+---
+
+## Step 2 — Open the HTML File
+
+Open the HTML file in a modern web browser.
+
+No separate frontend build system is specified in the provided project.
+
+---
+
+## Step 3 — Enter Gemini API Key
+
+Enter a valid Gemini API key in the application's API-key field.
+
+The application can save the configured API key, model, and language settings in browser `localStorage`.
+
+> **Security note:** The current implementation accepts the API key directly in the browser. For a production deployment, API credentials should preferably be handled through a secure backend rather than exposed to the client.
+
+---
+
+## Step 4 — Select Model
+
+The default model is:
+
+```text
+gemini-2.5-flash
+```
+
+You can use the model field provided by the application to configure the model.
+
+---
+
+## Step 5 — Enter Career Goal
+
+Example:
+
+```text
+Frontend Engineer
+```
+
+You can also provide your current background.
+
+Example:
+
+```text
+Class 12 student with basic Python and HTML knowledge
+```
+
+---
+
+## Step 6 — Generate Roadmap
+
+Click:
+
+```text
+Generate Roadmap
+```
+
+The application researches the target role and generates the personalized roadmap.
+
+---
+
+# 🎮 Example Demo Flow
+
+A strong demonstration of the application can follow this sequence:
+
+### 1. Enter Career Goal
+
+```text
+Frontend Engineer
+```
+
+### 2. Enter Background
+
+```text
+Beginner with basic HTML, CSS and Python knowledge
+```
+
+### 3. Generate Roadmap
+
+The application researches current requirements and creates a roadmap.
+
+### 4. Explore the Roadmap
+
+Show:
+
+* Skills
+* Projects
+* Credentials
+* Roles
+* Dependencies
+* Estimated time
+
+### 5. Mark Known Skills
+
+Select skills the student already knows.
+
+### 6. Replan
+
+Use the AI re-planning functionality to adapt the pathway.
+
+### 7. Open Career Coach
+
+Ask for guidance about a particular roadmap step.
+
+### 8. Open Coding Arena
+
+Generate a coding challenge based on the selected career skill.
+
+This gives a complete demonstration of:
+
+```text
+Research → Roadmap → Personalization → Adaptation → Coaching → Practice
+```
+
+---
+
+# 🏆 SIH Project Positioning
+
+For a **Smart India Hackathon (SIH)** presentation, the project can be positioned as:
+
+> **An AI-powered personalized career navigation platform that helps students understand the realistic pathway from their current skills to their desired career.**
+
+### SIH Problem
+
+Students frequently receive generic career advice that does not account for:
+
+* Their current skills
+* Industry requirements
+* Intermediate roles
+* Projects
+* Credentials
+* Learning pace
+* Changing hiring trends
+
+### Proposed Solution
+
+Career Roadmapper combines:
+
+```text
+Student Profile
+       +
+AI
+       +
+Current Web Research
+       +
+Skill Dependencies
+       +
+Adaptive Planning
+       +
+Coding Practice
+```
+
+to create a more personalized career-development experience.
+
+---
+
+# 🌟 SIH Innovation Points
+
+The project can highlight these aspects during an SIH presentation:
+
+### 1. Personalized Instead of Generic
+
+The roadmap changes according to the student's background and known skills.
+
+### 2. Industry-Grounded
+
+The application uses Google Search grounding to research current hiring information.
+
+### 3. Dependency-Based Learning
+
+Students can see which steps depend on previous skills.
+
+### 4. Adaptive Roadmap
+
+The pathway can be re-planned when the student's knowledge changes.
+
+### 5. Career + Practice
+
+The application connects career planning with an AI-powered coding arena.
+
+### 6. Continuous Guidance
+
+The Career Coach provides contextual assistance based on the student's roadmap.
+
+---
+
+# 📈 Possible Future Enhancements
+
+The following are proposed improvements rather than features confirmed in the provided file.
+
+## Student Profile
+
+Add information such as:
+
+* Academic year
+* Degree/branch
+* Skills
+* Projects
+* Certifications
+* Interests
+* Career preferences
+
+---
+
+## Skill-Gap Dashboard
+
+Show:
+
+```text
+Current Skills
+       ↓
+Required Skills
+       ↓
+Missing Skills
+       ↓
+Recommended Learning
+```
+
+---
+
+## Job & Internship Matching
+
+Connect roadmap skills with relevant:
+
+* Internships
+* Entry-level jobs
+* Job descriptions
+* Companies
+
+---
+
+## Progress Dashboard
+
+Track:
+
+* Completed skills
+* Completed projects
+* Certifications
+* Coding scores
+* Roadmap progress
+* Learning hours
+
+---
+
+## Mentor/Admin Dashboard
+
+A future version could provide mentors or institutions with dashboards to monitor student progress.
+
+---
+
+## Secure Backend
+
+For production deployment, a backend could handle:
+
+```text
+Frontend
+   ↓
+Backend API
+   ↓
+Gemini
+   ↓
+Search / Database
+```
+
+This would provide better control over API credentials and application data.
+
+---
+
+# ⚠️ Current Limitations
+
+The provided implementation has several considerations:
+
+### Client-Side API Key
+
+The Gemini API key is entered and handled in the browser.
+
+For production, a secure backend architecture would be preferable.
+
+### AI-Generated Results
+
+Roadmaps, coaching responses, and coding evaluations are AI-generated and should be reviewed rather than treated as guaranteed career advice.
+
+### Coding Evaluation
+
+The coding arena's evaluation is AI-based. The provided implementation describes judging submissions against hidden tests through AI rather than providing a secure server-side code execution sandbox.
+
+### No Database
+
+The provided project does not contain a backend database for persistent student profiles or progress.
+
+### No License Specified
+
+The uploaded project does not specify a software license. A `LICENSE` file should be added before publicly distributing the project if required.
+
+---
+
+# 📁 Suggested Repository Structure
+
+A simple repository can be organized as:
+
+```text
+career-roadmapper/
+│
+├── index.html
+├── README.md
+├── assets/
+│   └── screenshots/
+│
+└── LICENSE
+```
+
+`index.html` is a suggested repository filename; the provided source itself does not specify its original filename.
+
+---
+
+# 🔐 Security Considerations
+
+For a prototype/demo:
+
+* Do not share API keys publicly.
+* Avoid committing API keys to GitHub.
+* Do not place permanent production credentials directly in frontend source code.
+
+For production:
+
+```text
+User
+ ↓
+Frontend
+ ↓
+Secure Backend
+ ↓
+Gemini API
+ ↓
+Search / Other Services
+```
+
+---
+
+# 📜 Project Status
+
+**Current stage:** AI-powered browser prototype / demonstration application.
+
+The provided implementation already includes:
+
+* AI career research
+* Google Search grounding
+* Personalized roadmap generation
+* Roadmap visualization
+* Adaptive re-planning
+* Career Coach
+* Coding Arena
+* Filters
+* Multiple languages
+* Multi-tab communication
+
+---
+
+# 🎯 Project Vision
+
+Career Roadmapper aims to move career guidance from:
+
+```text
+"Learn these technologies."
+```
+
+toward:
+
+```text
+"Here is where you are.
+Here is where you want to go.
+Here are the skills you need.
+Here are realistic stepping stones.
+Here is what you should do next.
+And here is how your pathway changes as you progress."
+```
+
+---
+
+# 👨‍💻 Conclusion
+
+Career Roadmapper combines **AI, current web research, personalized learning pathways, dependency-based planning, career coaching, and coding practice** into one interactive platform.
+
+The goal is to help students transform an uncertain career goal into a structured and adaptable roadmap.
+
+---
+
+## ⭐ Future Vision
+
+```text
+Career Goal
+     ↓
+Personal Profile
+     ↓
+AI Skill-Gap Analysis
+     ↓
+Industry Research
+     ↓
+Personalized Roadmap
+     ↓
+Projects + Credentials
+     ↓
+Internships / Jobs
+     ↓
+Continuous Re-planning
+     ↓
+Career Success
+```
+
+---
+
+## 📄 License
+
+No license is specified in the provided project.
+
+If this project is published publicly, add an appropriate `LICENSE` file according to how you want others to use the project.
+
+---
+
+## 🙌 Acknowledgement
+
+This project uses Google Gemini capabilities and Google Search grounding for AI-powered career research and guidance.
