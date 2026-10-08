@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Career Roadmapper (Gemini + Google Search)</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0f1a;--pn:#121a2b;--ln:#2a3550;--tx:#e8ecf6;--mu:#8d9ac0;--ac:#7c9cff;--ok:#4ade80;--c0:#60a5fa;--c1:#a78bfa;--c2:#f472b6;--c3:#fbbf24;--c4:#34d399}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.apphead{display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid var(--ln);flex-wrap:wrap;align-items:center}
+h1{font-size:15px;margin:0 8px 0 0;white-space:nowrap}
+input,select{background:var(--pn);border:1px solid var(--ln);color:var(--tx);padding:9px 12px;border-radius:8px;font:inherit}
+.apphead input{flex:1;min-width:150px}
+button{background:var(--ac);color:#0b0f1a;border:0;padding:9px 14px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+button.g{background:var(--pn);color:var(--tx);border:1px solid var(--ln)}button:disabled{opacity:.5}
+#main{flex:1;display:flex;min-height:0;position:relative}
+#stage{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none;background:radial-gradient(circle at 1px 1px,#1c2540 1px,transparent 0) 0 0/28px 28px}
+svg{width:100%;height:100%;display:block}
+#side{width:360px;max-width:100%;background:var(--pn);border-left:1px solid var(--ln);overflow-y:auto;padding:14px}
+#side h2{margin:0 0 4px;font-size:17px}h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin:16px 0 6px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--ln);color:var(--mu);margin-right:4px}
+ul{margin:0;padding-left:18px}li{margin:3px 0}.mu{color:var(--mu)}
+.card{background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:10px;margin-top:6px}
+#hud{position:absolute;left:12px;top:12px;display:flex;gap:8px;flex-wrap:wrap;pointer-events:none}
+.chip{background:var(--pn);border:1px solid var(--ln);border-radius:99px;padding:5px 12px;font-size:12px}
+#zoom{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:6px}#zoom button{width:36px;padding:8px 0}
+#known{position:absolute;left:12px;bottom:12px;right:64px;display:flex;gap:6px;flex-wrap:wrap}
+#known .chip{cursor:pointer;color:var(--ok);border-color:#1f5a38}
+.node{cursor:pointer}.node rect.b{fill:var(--pn);stroke-width:2}.node:hover rect.b{fill:#1a2540}
+.node.lock{opacity:.5}.node.sel rect.b{stroke:#fff!important}.node.next rect.b{filter:drop-shadow(0 0 7px currentColor)}
+text{fill:var(--tx);font-size:13px;font-family:inherit;pointer-events:none}text.s{fill:var(--mu);font-size:11px}
+.edge{fill:none;stroke:#3b4a72;stroke-width:2}.edge.crit{stroke:var(--ac);stroke-width:3}
+#empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--mu)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--mu);border-top-color:transparent;border-radius:50%;animation:s 1s linear infinite;margin-right:6px;vertical-align:-1px}@keyframes s{to{transform:rotate(360deg)}}
+#filters{display:none;gap:8px;padding:8px 12px;border-bottom:1px solid var(--ln);flex-wrap:wrap;align-items:center}
+#filters button{padding:5px 11px;font-weight:500;font-size:12px}button.fk:not(.on){opacity:.4;text-decoration:line-through}
+#tabs{display:flex;gap:6px;margin:-14px -14px 12px;padding:10px 14px;border-bottom:1px solid var(--ln);position:sticky;top:-14px;background:var(--pn);z-index:2}
+#tabs button{background:var(--bg);color:var(--mu);border:1px solid var(--ln);padding:6px 12px}#tabs button.on{background:var(--ac);color:#0b0f1a}
+textarea{width:100%;height:180px;margin:8px 0;background:#070a12;color:#d6e2ff;border:1px solid var(--ln);border-radius:8px;padding:10px;font:12.5px/1.5 ui-monospace,Menlo,monospace;resize:vertical}
+.me{border-color:var(--ac)}code{color:var(--c3)}a{color:var(--ac)}
+@media(max-width:760px){#main{flex-direction:column}#side{width:100%;height:46%;border-left:0;border-top:1px solid var(--ln)}}
+</style></head><body>
+<div class="apphead"><h1>🗺️ Career Roadmapper</h1>
+<input id="goal" placeholder="Hyper-specific dream role, e.g. Full Stack Developer at a climate tech startup">
+<input id="bg" placeholder="Your background (optional)" style="max-width:260px">
+<input id="key" type="password" autocomplete="off" placeholder="Gemini API key (required)" style="max-width:200px">
+<input id="model" value="gemini-2.5-flash" style="max-width:150px;min-width:110px" title="Gemini model">
+<input id="lang" list="langs" value="en" title="Language code, e.g. en, hi, fr" style="max-width:90px;min-width:70px"><datalist id="langs"><option value="en"><option value="hi"><option value="fr"><option value="es"><option value="de"><option value="pt-BR"><option value="ar"><option value="ja"><option value="zh"></datalist>
+<span class="chip" id="mode"></span><button id="go">Generate roadmap</button></div>
+<div id="filters"></div>
+<div id="main"><div id="stage"><div id="empty">Real-time AI required: every roadmap, advice, coach reply and challenge is generated live by Gemini, grounded with Google Search.<br>Add a free Gemini key (<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">get one here</a>), then enter a specific target role above.</div>
+<svg id="svg" style="display:none"><g id="world"></g></svg><div id="hud"></div><div id="known"></div>
+<div id="zoom"><button class="g" id="zi">+</button><button class="g" id="zo">−</button><button class="g" id="zf">⤢</button></div></div>
+<aside id="side"><div id="tabs"><button data-t="node" class="on">Roadmap</button><button data-t="coach">Coach</button><button data-t="comp">Compete</button></div><div id="tp"><div class="mu">Select a node to see actionable guidance.</div></div></aside></div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const COL=['--c0','--c1','--c2','--c3','--c4'],W=200,H=66,GX=270,GY=96,API='https://generativelanguage.googleapis.com/v1beta/models/';
+let plan=null,known=new Set(),sel=null,det={},view={x:0,y:0,k:1},pos={},F={kinds:new Set(),phase:-1,hrs:10,q:''},tab='node',chat=[],ch=null,room=null,peersNow=[],lastL=null,draft='',myScore=null,curPL='JavaScript',me={name:'Player'+(100+Math.floor(Math.random()*900))};
+const PLS=['JavaScript','Python','Java','C++','C','C#','Go','Rust','TypeScript','Kotlin','Swift','PHP','Ruby','Dart','Scala','R','SQL','Bash'];
+const RTL=['ar','he','fa','ur','ps','sd','ug','yi','dv'];
+const langName=c=>{try{return new Intl.DisplayNames(['en'],{type:'language'}).of(c)||c}catch(e){return c}};
+const getLang=()=>{const c=($('lang').value||'en').trim()||'en';return{code:c,name:langName(c)}};
+const isEn=c=>/^en(-|$)/i.test(c);
+
+// ===== Gemini (always live) =====
+const keyOf=()=>{const k=$('key').value.trim();if(!k)throw{message:'Add your Gemini API key in the top bar. Real-time AI is required.'};return k};
+const modelOf=()=>$('model').value.trim()||'gemini-2.5-flash';
+async function gem(body){const r=await fetch(API+encodeURIComponent(modelOf())+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':keyOf()},body:JSON.stringify(body)});
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw{message:r.status===429?'Rate limit reached on the free tier. Wait a minute and retry.':(d.error?.message||'Gemini error '+r.status)};return d}
+const textOf=d=>(d.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
+async function callAI(input,json){keyOf();
+ const turns=typeof input==='string'?[{role:'user',content:input}]:input;
+ const body={contents:turns.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:String(m.content)}]})),generationConfig:{maxOutputTokens:8192,temperature:.8}};
+ const LG=getLang(),LI=isEn(LG.code)?'':` Write every human-readable string value in ${LG.name} (language code ${LG.code}); keep JSON keys, ids, the kind values (skill, project, credential, role, goal) and code identifiers in English.`;
+ if(json){body.systemInstruction={parts:[{text:'You are a JSON API. Respond with ONLY one valid JSON object, no prose.'+LI}]};body.generationConfig.responseMimeType='application/json'}
+ else{body.systemInstruction={parts:[{text:'Use Google Search when current facts help.'+(LI?` Reply in ${LG.name} (language code ${LG.code}).`:'')}]};body.tools=[{google_search:{}}]}
+ const text=textOf(await gem(body));
+ if(!text)throw{message:'Empty response (maybe blocked by safety filters). Try rephrasing.'};
+ if(!json)return{text};
+ const t=text.replace(/```json|```/g,'').trim();try{return{json:JSON.parse(t)}}catch(e){const a=t.indexOf('{'),b=t.lastIndexOf('}');return{json:JSON.parse(t.slice(a,b+1))}}}
+const ask=p=>callAI(p,true).then(r=>r.json);
+async function research(g,b){$('empty').innerHTML='<span class="spin"></span>Searching Google for live hiring data…';
+ try{const d=await gem({contents:[{role:'user',parts:[{text:`Using Google Search, research CURRENT (${new Date().getFullYear()}) hiring reality for this target: "${g}". Candidate: ${b||'college student'}. Report concisely with bullet points: the most requested skills and tools in recent job postings, typical entry-level and intermediate job titles, useful certifications or courses, realistic timelines, and 2-3 notable companies or trends in that niche. Max 250 words.`}]}],tools:[{google_search:{}}]});
+  const c=d.candidates?.[0],text=textOf(d).trim();if(!text)throw new Error('no search results returned');
+  const seen=new Set(),sources=(c?.groundingMetadata?.groundingChunks||[]).map(x=>x.web).filter(w=>w&&w.uri&&!seen.has(w.uri)&&seen.add(w.uri)).map(w=>({title:w.title||w.uri,uri:w.uri})).slice(0,6);
+  return{text,sources}}
+ catch(e){throw{message:'Live Google search failed: '+(e.message||e)}}
+ finally{$('empty').innerHTML='<span class="spin"></span>Building your roadmap…'}}
+try{$('key').value=localStorage.getItem('gkey')||'';$('model').value=localStorage.getItem('gmodel')||$('model').value;$('lang').value=localStorage.getItem('glang')||'en';
+ $('key').oninput=e=>{localStorage.setItem('gkey',e.target.value.trim());updateMode()};$('model').oninput=e=>localStorage.setItem('gmodel',e.target.value.trim())}catch(e){}
+function updateMode(){$('mode').textContent=$('key').value.trim()?'✨ Gemini + Google Search · '+getLang().name:'⚠️ API key required'}
+function applyLang(){const g=getLang();try{localStorage.setItem('glang',g.code)}catch(e){}document.documentElement.lang=g.code;$('side').dir=RTL.includes(g.code.toLowerCase().split('-')[0])?'rtl':'ltr';updateMode()}
+$('lang').addEventListener('change',()=>{det={};applyLang();if(plan)$('tp').innerHTML=`<p class="mu">Language set to <b>${esc(getLang().name)}</b>. Click a node for advice in this language, or generate again to translate the whole tree.</p>`});
+applyLang();
+
+// ===== graph =====
+const gone=n=>known.has(n.id)||(n.kind!=='goal'&&(F.kinds.has(n.kind)||(F.phase>=0&&n.phase!==F.phase)||(F.q&&!(n.title+' '+n.why).toLowerCase().includes(F.q))));
+const wk=n=>Math.max(1,Math.ceil((+n.weeks||1)*10/F.hrs));
+const byId=()=>Object.fromEntries(plan.nodes.map(n=>[n.id,n]));
+const trunc=(s,n)=>s&&s.length>n?s.slice(0,n-1)+'…':s;
+function effDeps(n,m,seen=new Set()){let r=[];for(const d of n.deps||[]){const p=m[d];if(!p||seen.has(d))continue;seen.add(d);if(gone(p))r.push(...effDeps(p,m,seen));else r.push(d)}return[...new Set(r)]}
+function layout(){const m=byId(),vis=plan.nodes.filter(n=>!gone(n)),dep={},ed=[],ef={};vis.forEach(n=>ef[n.id]=effDeps(n,m));
+ const lv=id=>{if(dep[id]!=null)return dep[id];dep[id]=0;const d=ef[id].filter(x=>ef[x]);return dep[id]=d.length?1+Math.max(...d.map(lv)):0};
+ vis.forEach(n=>lv(n.id));vis.forEach(n=>ef[n.id].forEach(d=>ef[d]&&ed.push([d,n.id])));
+ const cols={};vis.forEach(n=>(cols[dep[n.id]]??=[]).push(n));pos={};
+ Object.entries(cols).forEach(([c,a])=>{a.sort((x,y)=>x.phase-y.phase);a.forEach((n,i)=>pos[n.id]={x:c*GX,y:(i-(a.length-1)/2)*GY})});
+ const best={},f=id=>best[id]??=wk(m[id])+Math.max(0,...ef[id].filter(x=>ef[x]).map(f));
+ let tot=0,end=null;vis.forEach(n=>{const v=f(n.id);if(v>tot){tot=v;end=n.id}});
+ const crit=new Set();let cur=end;while(cur){crit.add(cur);cur=ef[cur].filter(x=>ef[x]).sort((a,b)=>best[b]-best[a])[0]}
+ return{vis,ef,ed,tot,crit}}
+function render(keepView){const L=lastL=layout();let h='';
+ L.ed.forEach(([a,b])=>{const p=pos[a],q=pos[b];if(!p||!q)return;const x1=p.x+W,y1=p.y,x2=q.x,y2=q.y,mx=(x1+x2)/2;h+=`<path class="edge ${L.crit.has(a)&&L.crit.has(b)?'crit':''}" d="M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}"/>`});
+ L.vis.forEach(n=>{const p=pos[n.id],col=`var(${COL[(n.phase||0)%5]})`,ready=L.ef[n.id].every(d=>!pos[d]);
+  h+=`<g class="node ${ready?'next':'lock'} ${sel===n.id?'sel':''}" data-id="${esc(n.id)}" transform="translate(${p.x} ${p.y-H/2})" style="color:${col}"><rect class="b" width="${W}" height="${H}" rx="12" stroke="${col}"/><text x="12" y="25">${esc(trunc(n.title,26))}</text><text class="s" x="12" y="45">${esc(n.kind||'')} · ${wk(n)}w${ready?' · ready':''}</text></g>`});
+ $('world').innerHTML=h;
+ $('hud').innerHTML=`${plan.live?'<span class="chip" style="color:var(--ok)">🌐 Live Google data</span>':''}<span class="chip">⏱ ~${L.tot} weeks on the critical path</span><span class="chip">${L.vis.length} steps left · ${known.size} known · ${plan.nodes.length-known.size-L.vis.length} filtered out · ${F.hrs}h/wk</span>`+(plan.phases||[]).map((p,i)=>`<span class="chip" style="color:var(${COL[i%5]})">● ${esc(p)}</span>`).join('');
+ $('known').innerHTML=[...known].map(id=>`<span class="chip" data-un="${esc(id)}" title="Click to unmark">✓ ${esc(byId()[id]?.title)}</span>`).join('');
+ if(!keepView)fit();apply()}
+const apply=()=>$('world').setAttribute('transform',`translate(${view.x} ${view.y}) scale(${view.k})`);
+function fit(){const ps=Object.values(pos);if(!ps.length)return;const r=$('stage').getBoundingClientRect();
+ const x0=Math.min(...ps.map(p=>p.x))-30,x1=Math.max(...ps.map(p=>p.x))+W+30,y0=Math.min(...ps.map(p=>p.y))-H,y1=Math.max(...ps.map(p=>p.y))+H;
+ const k=Math.min(1.2,r.width/(x1-x0),(r.height-90)/(y1-y0));view={k,x:(r.width-(x1-x0)*k)/2-x0*k,y:(r.height-(y1-y0)*k)/2-y0*k-10};apply()}
+function zoomAt(f,cx,cy){const k=Math.max(.2,Math.min(3,view.k*f));view.x=cx-(cx-view.x)*k/view.k;view.y=cy-(cy-view.y)*k/view.k;view.k=k;apply()}
+const st=$('stage');let drag=null,moved=0;
+st.addEventListener('wheel',e=>{e.preventDefault();const r=st.getBoundingClientRect();zoomAt(e.deltaY<0?1.1:.9,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+st.addEventListener('pointerdown',e=>{if(e.target.closest('button,.chip'))return;drag={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y};moved=0});
+addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;moved=Math.max(moved,Math.abs(dx)+Math.abs(dy));view.x=drag.vx+dx;view.y=drag.vy+dy;apply()});
+addEventListener('pointerup',e=>{if(drag&&moved<5){const n=e.target.closest?.('.node');if(n)select(n.dataset.id)}drag=null});
+st.addEventListener('click',e=>{const u=e.target.closest('[data-un]');if(u){known.delete(u.dataset.un);render(true)}});
+const mid=()=>{const r=st.getBoundingClientRect();return[r.width/2,r.height/2]};
+$('zi').onclick=()=>zoomAt(1.25,...mid());$('zo').onclick=()=>zoomAt(.8,...mid());$('zf').onclick=fit;
+
+// ===== generate =====
+const fixDeps=r=>{const ids=new Set(r.nodes.map(n=>n.id));r.nodes.forEach(n=>n.deps=(n.deps||[]).filter(d=>ids.has(d)&&d!==n.id))};
+$('go').onclick=async()=>{const g=$('goal').value.trim();if(!g)return;const b=$('bg').value.trim();
+ if(!$('key').value.trim()){$('empty').style.display='flex';$('svg').style.display='none';$('empty').innerHTML='Add your Gemini API key first. Real-time AI is required.';$('key').focus();return}
+ $('go').disabled=true;$('empty').style.display='flex';$('empty').innerHTML='<span class="spin"></span>Reverse-engineering the career paths of people in this role…';$('svg').style.display='none';
+ try{const rs=await research(g,b);
+  const r=await ask(`You are a career analyst. Reverse-engineer the realistic path to this exact target: "${g}". Candidate background: ${b||'college student, little experience'}.\n\nLIVE MARKET RESEARCH from Google Search (today ${new Date().toDateString()}):\n${rs.text}\n\nUse this research to ground the skills, roles, tools and timelines.
+Return ONLY JSON: {"goal":str,"summary":str(2 sentences),"phases":[4 short phase names, chronological],"nodes":[14-18 items {"id":"short_snake","title":"<=30 chars","phase":0-3 index into phases,"kind":"skill|project|credential|role|goal","weeks":int,"why":"one sentence on why it matters for THIS role/company type","deps":[ids of prerequisite nodes]}]}.
+Rules: realistic stepping stones (micro-credentials, intermediate/entry roles like internships or junior jobs, niche side projects tied to the domain); a DAG with parallel branches; exactly one final node of kind "goal" depending on the last steps; every dep must be a defined id; weeks are honest estimates.`);
+  fixDeps(r);plan=r;plan.goalText=g;plan.sources=rs.sources;plan.live=true;known=new Set();sel=null;det={};F={kinds:new Set(),phase:-1,hrs:10,q:''};chat=[];ch=null;buildFilters();tab='node';tabsUI();
+  $('empty').style.display='none';$('svg').style.display='block';render();
+  $('tp').innerHTML=`<h2>${esc(r.goal||g)}</h2><p class="mu">${esc(r.summary)}</p><p class="mu">Click any node for a custom project, repo idea and interview questions. Mark skills you know and the tree re-routes.</p>${srcHTML()}`}
+ catch(e){$('empty').innerHTML='Could not generate: '+esc(e.message||e.code||e)}
+ $('go').disabled=false};
+$('goal').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
+function srcHTML(){if(!plan?.sources?.length)return'<p class="mu">🌐 Grounded in live Google Search results.</p>';
+ return`<h3>🌐 Live sources (Google Search)</h3><ul>${plan.sources.map(s=>`<li><a href="${esc(s.uri)}" target="_blank" rel="noopener">${esc(s.title)}</a></li>`).join('')}</ul><p class="mu">Roadmap grounded in search results from ${esc(new Date().toDateString())}.</p>`}
+function select(id){sel=id;tab='node';tabsUI();render(true);panel(id)}
+function panel(id){if(tab!=='node')return;const n=byId()[id];if(!n)return;const d=det[id];
+ let h=`<h2>${esc(n.title)}</h2><span class="tag">${esc(n.kind)}</span><span class="tag">${esc(plan.phases?.[n.phase]||'')}</span><span class="tag">~${wk(n)} weeks</span><p>${esc(n.why)}</p><button id="kn">✓ I already know this</button> <button class="g" id="re">↻ Re-plan with AI</button>`;
+ if(!d)h+=`<p class="mu"><span class="spin"></span>Generating tailored advice…</p>`;
+ else if(d.err)h+=`<p class="mu">${esc(d.err)}</p>`;
+ else h+=`<h3>Weekend project</h3><div class="card"><b>${esc(d.project?.title)}</b><p>${esc(d.project?.pitch)}</p><ul>${(d.project?.steps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div><h3>Repo to study / search</h3><div class="card">${esc(d.repo?.what)}<br><span class="mu">GitHub search: <code>${esc(d.repo?.query)}</code></span></div><h3>How to prove it</h3><p>${esc(d.proof)}</p><h3>Interview questions</h3><ul>${(d.questions||[]).map(q=>`<li>${esc(q)}</li>`).join('')}</ul>`;
+ $('tp').innerHTML=h;$('kn').onclick=()=>{known.add(id);sel=null;render(true);$('tp').innerHTML=`<p class="mu">Marked <b>${esc(n.title)}</b> as known. The tree has been re-routed.</p>`};
+ $('re').onclick=replan;if(!d)load(n)}
+async function load(n){try{det[n.id]=await ask(`Target role: "${plan.goalText}". Candidate background: ${$('bg').value||'student'}. Milestone: "${n.title}" (${n.kind}) — ${n.why}.
+Give hyper-specific, actionable guidance as ONLY JSON: {"project":{"title":str,"pitch":str,"steps":[4-5 concrete steps, doable in a weekend, themed to the target industry]},"repo":{"what":"type of open-source repo to read and what to learn from it (do not invent exact URLs)","query":"a GitHub search query to find it"},"proof":"one sentence: what artifact/evidence shows hiring managers you've mastered this","questions":[5 interview questions specific to this skill and role]}`)}
+ catch(e){det[n.id]={err:'Could not load advice: '+(e.message||e.code)}}
+ if(sel===n.id)panel(n.id)}
+async function replan(){const k=[...known].map(i=>byId()[i].title);$('re').disabled=true;$('re').textContent='Re-planning…';
+ try{const r=await ask(`Current roadmap JSON: ${JSON.stringify(plan)}. The candidate already knows: ${JSON.stringify(k)}. Revise the roadmap for "${plan.goalText}": keep node ids that still apply, drop or merge redundant steps, add any more advanced steps that become relevant, and re-estimate weeks. Return ONLY the same JSON schema (14-18 nodes, valid deps, one goal node).`);
+  fixDeps(r);r.goalText=plan.goalText;r.sources=plan.sources;r.live=plan.live;plan=r;known=new Set([...known].filter(x=>byId()[x]));det={};sel=null;render();$('tp').innerHTML='<p class="mu">Roadmap re-planned around your existing skills.</p>'}
+ catch(e){$('re')&&($('re').textContent='Failed — retry')}$('re')&&($('re').disabled=false)}
+
+// ===== filters & tabs =====
+function buildFilters(){const ks=[...new Set(plan.nodes.map(n=>n.kind))].filter(k=>k!=='goal'),f=$('filters');f.style.display='flex';
+ f.innerHTML=`<span class="mu">Filters</span>`+ks.map(k=>`<button class="g fk on" data-k="${esc(k)}">${esc(k)}</button>`).join('')+`<select id="fp"><option value="-1">All phases</option>${(plan.phases||[]).map((p,i)=>`<option value="${i}">${esc(p)}</option>`).join('')}</select><label class="mu">Pace <input type="range" id="fh" min="2" max="40" value="10" style="min-width:0;width:100px;padding:0"> <b id="fhv">10</b> h/wk</label><input id="fq" placeholder="Search steps…" style="max-width:170px;min-width:100px">`}
+$('filters').addEventListener('click',e=>{const b=e.target.closest('.fk');if(!b)return;b.classList.toggle('on');F.kinds[b.classList.contains('on')?'delete':'add'](b.dataset.k);render()});
+$('filters').addEventListener('input',e=>{const t=e.target;if(t.id==='fp')F.phase=+t.value;if(t.id==='fh'){F.hrs=+t.value;$('fhv').textContent=t.value}if(t.id==='fq')F.q=t.value.toLowerCase().trim();render()});
+const tabsUI=()=>document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+$('tabs').onclick=e=>{const t=e.target.dataset?.t;if(!t)return;tab=t;tabsUI();if(t==='node')sel&&plan?panel(sel):$('tp').innerHTML='<div class="mu">Select a node to see actionable guidance.</div>';else if(t==='coach')coachUI();else compUI()};
+
+// ===== coach (Gemini + Google Search) =====
+const bub=m=>`<div class="card ${m.role==='user'?'me':''}"><b>${m.role==='user'?'You':'Coach'}</b><div style="white-space:pre-wrap">${esc(m.content||'…')}</div></div>`;
+const paint=()=>{if(tab==='coach'&&$('msgs')){$('msgs').innerHTML=chat.map(bub).join('');$('msgs').lastElementChild?.scrollIntoView({block:'nearest'})}};
+function coachUI(){$('tp').innerHTML=`<h2>Career coach</h2><p class="mu">Knows your roadmap, known skills, filters and pace, and checks Google for current facts.</p><div id="msgs">${chat.map(bub).join('')}</div><div style="display:flex;gap:6px;margin-top:8px"><input id="ci" placeholder="Ask about your path…" style="min-width:0;flex:1"><button id="cs">Send</button></div><div id="qs"></div>`;
+ if(!chat.length)$('qs').innerHTML=['What should I do this month?','Which skills matter most for hiring?','Is my pace realistic?'].map(q=>`<button class="g qk" style="margin:6px 6px 0 0;font-weight:400;font-size:12px">${esc(q)}</button>`).join('');
+ $('cs').onclick=()=>say($('ci').value);$('ci').onkeydown=e=>{if(e.key==='Enter')say($('ci').value)};$('qs').onclick=e=>{if(e.target.classList.contains('qk'))say(e.target.textContent)}}
+async function say(q){q=q.trim();if(!q)return;if(!plan){chat.push({role:'user',content:q},{role:'assistant',content:'Generate a roadmap first so I can tailor my advice.'});return coachUI()}
+ chat.push({role:'user',content:q},{role:'assistant',content:''});coachUI();
+ const ctx=`You are a practical, encouraging career coach. Plain text, under 170 words, no headers. Target: ${plan.goalText}. Background: ${$('bg').value||'student'}. Steps: ${plan.nodes.map(n=>n.title+(known.has(n.id)?' [known]':gone(n)?' [filtered out]':'')).join('; ')}. Pace ${F.hrs}h/week; remaining critical path ~${lastL?.tot} weeks. Selected node: ${sel?byId()[sel]?.title:'none'}.\n\nConversation follows; answer the last user message.\n\n`;
+ const turns=chat.slice(0,-1).map((m,i)=>({role:m.role,content:i?m.content:ctx+m.content}));
+ try{chat[chat.length-1].content=(await callAI(turns,false)).text}catch(e){chat[chat.length-1].content='Coach unavailable: '+(e.message||e.code)}paint()}
+
+// ===== arena (AI-written challenges, AI judge, shared via BroadcastChannel) =====
+function initRoom(){try{const bc=new BroadcastChannel('career-roadmapper'),id=Math.random().toString(36).slice(2);let own={};const others=new Map();
+ const sync=()=>{const now=Date.now();for(const[k,v]of others)if(now-v.t>9000)others.delete(k);peersNow=[{presence:own,isMe:true},...[...others.values()].map(v=>({presence:v.p,isMe:false}))]};
+ const send=()=>bc.postMessage({id,p:own});
+ bc.onmessage=e=>{const m=e.data;if(m.bye)others.delete(m.id);else if(m.hello)send();else others.set(m.id,{p:m.p,t:Date.now()});sync();adopt();if(tab==='comp')lb()};
+ room={presence:async p=>{own={...own,...p};send();sync();if(tab==='comp')lb()}};
+ bc.postMessage({hello:1,id});setInterval(()=>{send();sync();if(tab==='comp')lb()},3000);addEventListener('beforeunload',()=>bc.postMessage({bye:1,id}));sync()}catch(e){room=null}}
+const pub=x=>room&&room.presence({name:me.name,cid:ch?.id,ch,...x}).catch(()=>{});
+function adopt(){for(const p of peersNow){const c=p.presence?.ch;if(!p.isMe&&c&&(!ch||c.id>ch.id)){ch=c;myScore=null;draft='';pub({score:null});if(tab==='comp')compUI()}}}
+function compUI(){$('tp').innerHTML=`<h2>Live coding arena</h2><span class="tag">${room?'live: open this page in a 2nd tab to compete':'solo mode'}</span>
+ <div style="display:flex;gap:6px;margin:10px 0;flex-wrap:wrap"><input id="nm" value="${esc(me.name)}" style="min-width:0;flex:1"><select id="df"><option>easy</option><option selected>medium</option><option>hard</option></select><select id="pl">${PLS.map(x=>`<option${x===curPL?' selected':''}>${x}</option>`).join('')}</select><button id="nc">New round</button></div>
+ ${ch?`<div class="card"><b>${esc(ch.title)}</b> <span class="tag">${esc(ch.level)}</span><span class="tag" id="tm"></span><p>${esc(ch.statement)}</p><code>${esc(ch.signature)}</code><ul>${(ch.examples||[]).map(x=>`<li><code>${esc(x.in)}</code> → <code>${esc(x.out)}</code></li>`).join('')}</ul></div><textarea id="code" spellcheck="false" placeholder="Write your solution in the language you selected…">${esc(draft)}</textarea><button id="sub">Submit for AI judging</button><div id="res"></div>`:`<p class="mu">Start a round: Gemini writes a timed challenge from your roadmap. Everyone with the page open gets the same challenge and a live leaderboard.</p>`}
+ <h3>Leaderboard</h3><div id="lb"></div>`;
+ $('nm').oninput=e=>{me.name=e.target.value.slice(0,20)||'anon';pub({score:myScore?.score,at:myScore?.at});lb()};
+ $('nc').onclick=newRound;$('pl').onchange=e=>curPL=e.target.value;
+ if(ch){$('code').oninput=e=>draft=e.target.value;$('code').onkeydown=e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'  ')}};$('sub').onclick=submit}lb()}
+async function newRound(){if(!plan){$('lb').innerHTML='<p class="mu">Generate a roadmap first.</p>';return}$('nc').disabled=true;$('nc').textContent='Writing…';const n=sel?byId()[sel]:null;
+ try{const r=await ask(`Write ONE self-contained, language-agnostic coding challenge (solvable in 10 minutes, a single function; players may answer in any programming language) that tests "${n?n.title:plan.goal}" for a candidate targeting "${plan.goalText}". Difficulty: ${$('df').value}. Make it domain-flavoured, not generic. Return ONLY JSON {"title":str,"level":str,"statement":str(max 70 words),"signature":"function name(args)","examples":[{"in":str,"out":str},{"in":str,"out":str}]}`);
+  ch={...r,id:Date.now(),mins:10};draft='';myScore=null;pub({score:null})}catch(e){alert('Could not create a challenge: '+(e.message||e.code))}
+ compUI()}
+async function submit(){if(!ch)return;const res=$('res');if(Date.now()>ch.id+ch.mins*6e4){res.innerHTML='<p class="mu">Time is up for this round.</p>';return}
+ $('sub').disabled=true;res.innerHTML='<p class="mu"><span class="spin"></span>Judge is running your code against hidden tests…</p>';
+ try{const r=await ask(`You are a strict code judge. Challenge: ${JSON.stringify(ch)}. Candidate code written in ${curPL} (adapt the function name from the signature to ${curPL} conventions):\n\`\`\`\n${draft}\n\`\`\`\nMentally execute against ~8 hidden tests including edge cases. Return ONLY JSON {"score":0-100 int,"passed":"x/8","feedback":"2 sentences max, specific","complexity":str}`);
+  const sc=Math.max(0,Math.min(100,Math.round(+r.score||0)));if(!myScore||sc>=myScore.score)myScore={score:sc,at:Date.now()-ch.id};pub({score:myScore.score,at:myScore.at});
+  res.innerHTML=`<div class="card"><b>Score ${sc}/100</b> · ${esc(r.passed)} · ${esc(r.complexity)}<p>${esc(r.feedback)}</p></div>`}
+ catch(e){res.innerHTML='<p class="mu">Judge unavailable: '+esc(e.message||e.code)+'</p>'}
+ $('sub').disabled=false;lb()}
+function lb(){const el=$('lb');if(!el)return;let rows=ch?peersNow.filter(p=>p.presence?.cid===ch.id).map(p=>({n:p.presence.name||'anon',s:p.presence.score,at:p.presence.at||0,me:p.isMe})):[];
+ if(!rows.some(r=>r.me))rows.push({n:me.name,s:myScore?.score,at:myScore?.at||0,me:true});
+ rows.sort((a,b)=>(b.s??-1)-(a.s??-1)||a.at-b.at);
+ el.innerHTML=rows.map((r,i)=>`<div class="card ${r.me?'me':''}">${i+1}. <b>${esc(r.n)}</b>${r.me?' (you)':''} — ${r.s!=null?r.s+' pts · '+Math.round(r.at/1000)+'s':'<span class="mu">coding…</span>'}</div>`).join('')||'<p class="mu">No players yet.</p>'}
+setInterval(()=>{const e=$('tm');if(e&&ch){const l=ch.id+ch.mins*6e4-Date.now();e.textContent=l>0?`⏱ ${Math.floor(l/6e4)}:${String(Math.floor(l/1e3)%60).padStart(2,'0')}`:'Time is up'}},1000);
+initRoom();
+</script></body></html>
